@@ -44,21 +44,18 @@ function App() {
 }
 
 const ProtectedRoute = ({ children }) => {
+  // We could also replace React.useContext by a more declarative syntax using <AuthConsumer> like we did in <App>
   let auth = React.useContext(AuthContext);
   let location = useLocation();
 
-  if (!auth.isAuth) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience
-    // than dropping them off on the home page.
-
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  return children ? children : <Outlet />;
+  return (
+    <>
+      {auth.isLoading && <p>Loading</p>}
+      {auth.isAuth && (children ? children : <Outlet />)}
+      {!auth.isLoading && !auth.isAuth && <Navigate to="/login" state={{ from: location }} replace />}
+    </>
+  )
 }
-
 
 const Home = () => {
   return (<div>I am the home page</div>);
