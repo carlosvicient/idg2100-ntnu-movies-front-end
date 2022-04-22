@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Route, Routes, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Route, Routes, Link, useNavigate, useLocation, Navigate, Outlet } from 'react-router-dom';
 
 import { AuthConsumer, AuthContext } from './utils/AuthContextProvider';
 
@@ -15,21 +15,23 @@ function App() {
             <header className="App-header">
               {/* TIP: this is not good in terms of accessibility. We should use nav + ul>li  */}
               <Link to="/">Public</Link>
-              
+
               {/* Now we can use the AuthConsumer to know if the user is authenticated and show specific elements in the menu */}
               {isAuth && <Link to="/dashboard">Dashboard</Link>}
-              
+
               {!isAuth && <Link to="/login">Log in</Link>}
-              
+
               {/* Only show link if authenticated user */}
               {isAuth && <Link to="/logout">Log out</Link>}
             </header>
             <main>
               <Routes>
                 <Route index element={<Home />} />
-                <Route path="dashboard" element={<Dashboard />} />
                 <Route path="login" element={<Login />} />
                 <Route path="logout" element={<Logout />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="dashboard" element={<Dashboard />} />
+                </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
@@ -40,6 +42,23 @@ function App() {
     </div>
   );
 }
+
+const ProtectedRoute = ({ children }) => {
+  let auth = React.useContext(AuthContext);
+  let location = useLocation();
+
+  if (!auth.isAuth) {
+    // Redirect them to the /login page, but save the current location they were
+    // trying to go to when they were redirected. This allows us to send them
+    // along to that page after they login, which is a nicer user experience
+    // than dropping them off on the home page.
+
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children ? children : <Outlet />;
+}
+
 
 const Home = () => {
   return (<div>I am the home page</div>);
