@@ -1,11 +1,14 @@
 //Inspired by https://codesandbox.io/s/q9m26noky6?file=/src/helpers/AuthContext.js:0-638 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { login } from '../api/users';
 
 // You can define what you need in the state. You may not need isLoading, or user or token
 const INITIAL_STATE = { isAuth: false, isLoading: true, token: null, user: null };
 
 const AuthContext = React.createContext();
 
+// Local storage key prefix hardcoded - remember: localStorage is not a good in terms of security
 const KEY = "AUTH_APP-";
 
 class AuthProvider extends React.Component {
@@ -36,23 +39,25 @@ class AuthProvider extends React.Component {
   }
 
   login = async (userData) => {
+
     const { email, password } = userData;
+    try {
+      const response = await login(email, password);
 
-    //We use a timeout to fake a API query
-    // Replace this by real query
-    await new Promise(resolve => setTimeout(resolve, 1000));
+      //Current API only returns token as "data"
+      const { token, user } = {token: response.data, user: "No name"};
 
-    const token = 'thisIsAJWT';
-    const user = 'Jane Doe';
+      //Remember, not recommended using localStorage!
+      localStorage.setItem(KEY + "token", token);
+      localStorage.setItem(KEY + "user", user);
 
-    localStorage.setItem(KEY + "token", token);
-    localStorage.setItem(KEY + "user", user);
-
-    //Then, we emulate the log in was successful and set some dummy data
-    this.setState({ isAuth: true, token, user, isLoading: false });
-    // optionally, we can return the user and token (or any other data we need/want)
-
-    return { user, token };
+      this.setState({ isAuth: true, token, user, isLoading: false });
+      return response.data;
+    } catch (err) {
+      this.setState({ ...INITIAL_STATE, isLoading: false });
+      // The Login component using this function should capture the error and so something there
+      return err.response.data;
+    }
   };
 
   logout = async () => {
@@ -69,6 +74,20 @@ class AuthProvider extends React.Component {
     this.setState({ ...INITIAL_STATE, isLoading: false });
   };
 
+  // Let's add a function that generates the HTTPHeaders with the Bearer token
+  generateHeaders = () => {
+    const request = {};
+    const token = this.state.token;
+
+    if (token) {
+      request.headers = {
+        Authorization: `Bearer ${token}`
+      }
+    }
+    return request;
+  }
+
+
   // The AuthProvider will expose: isAuth, isLoading, token and user as well as login, logout and generateHeaders functions
   render() {
     return (
@@ -80,6 +99,7 @@ class AuthProvider extends React.Component {
           user: this.state.user,
           login: this.login,
           logout: this.logout,
+          generateHeaders: this.generateHeaders
         }}
       >
         {this.props.children}

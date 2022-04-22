@@ -68,3 +68,17 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+# Comments about new structure
+
+* src/utils: different utilities such as custom hooks, helpers, context providers, constants, etc.
+
+* src/api: usually used to contain "services". The service will be used to connect our front-end with backend API. We can have 1 service per "collection" we have in the DB (e.g.: User.service.js, Movies.service.js, auth.service.js, axios.js, etc.)
+
+# Tags
+
+* v0.1.0: Routes skeleton
+* v0.1.1: AuthContextProvider part 1. Login and logout without protected routes
+* v0.1.1: AuthContextProvider part 2. ProtectedRoutes using Layout Routes. Problem => reloading the page logs the user out.
+* v0.1.2: AuthContextProvider part 3. Using localStorage to store authenticated user => Really bad solution for security but "easy" to implement.
+* v1.0.0: Example with NTNU movie project. It uses localStorage  (remember it is not the best)

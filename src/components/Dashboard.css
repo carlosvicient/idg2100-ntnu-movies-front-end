@@ -1,0 +1,14 @@
+.dashboard-component {
+  max-width: 70ch;
+  margin: 1rem auto;
+}
+
+.dashboard-component .create-movie-container {
+  padding: 1rem;
+  border: .5px solid darkgray;
+  background-color: lightgray;
+} 
+
+.dashboard-component ul {
+  text-align: left;
+}
